@@ -38,3 +38,46 @@ INSERT INTO InvoiceTable (SERIAL_NO, INVOICE_DATE) VALUES
 
 
 ```
+
+
+**DQL**
+
+**Solution that I've gave**
+
+```
+-- The logic behind this was to create a table containing one column computing invoice numbers from 330115 to 330125
+WITH RECURSIVE SERIALNUMBERS AS
+	(SELECT 330115 AS SERIAL_NO
+		UNION ALL SELECT SERIAL_NO + 1
+		FROM SERIALNUMBERS
+		WHERE SERIAL_NO < 330125 )
+
+-- Then we've joined the 2 tables together to  select only missing SERIAL Numbers in thz InvoiceTable
+SELECT L.SERIAL_NO AS MISSING_SERTIAL_NO
+FROM SERIALNUMBERS L
+LEFT JOIN INVOICETABLE R ON L.SERIAL_NO = R.SERIAL_NO
+WHERE R.SERIAL_NO IS NULL
+ORDER BY L.SERIAL_NO;
+```
+
+**Simple Solution**
+
+```
+-- Solution 2: Simple approach
+
+SELECT GENERATE_SERIES(330115, 330125) AS MISSING_SERTIAL_NO
+EXCEPT
+SELECT SERIAL_NO
+FROM INVOICETABLE
+ORDER BY 1;
+
+
+-- Solution 3: Another simple approach
+
+SELECT GENERATE_SERIES(min(SERIAL_NO), max(SERIAL_NO)) AS MISSING_SERTIAL_NO
+FROM INVOICETABLE
+EXCEPT 
+SELECT SERIAL_NO
+FROM INVOICETABLE
+ORDER BY 1;
+```
